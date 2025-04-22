@@ -1,16 +1,16 @@
 //
-//  lessonTwo.swift
+//  DownloadImageAsync.swift
 //  Concurrency
 //
-//  Created by David Cartwright on 2025-02-13.
+//  Created by David Cartwright on 2025-04-22.
 //
 
 import SwiftUI
 import Combine
 
-class ImageLoader {
+class DownloadImageAsyncLoader {
     
-    let url = URL(string: "https://picsum.photos/200/300/?blur")!
+    let url = URL(string: "https://picsum.photos/200")!
     
     func handleResponse(data: Data?, response: URLResponse?) -> UIImage? {
         guard let data = data,
@@ -23,7 +23,7 @@ class ImageLoader {
         return image
     }
     
-    func downloadWithEscaping(completionHandler: @escaping (_ image: UIImage?, _ error: Error?) -> Void) {
+    func downloadWithEscaping(completionHandler: @escaping (_ image: UIImage?, _ error: Error?) -> ()) {
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             let image = self?.handleResponse(data: data, response: response)
             completionHandler(image, error)
@@ -34,7 +34,7 @@ class ImageLoader {
     func downloadWithCombine() -> AnyPublisher<UIImage?, Error> {
         URLSession.shared.dataTaskPublisher(for: url)
             .map(handleResponse)
-            .mapError( {$0} )
+            .mapError { $0 }
             .eraseToAnyPublisher()
     }
     
@@ -42,66 +42,72 @@ class ImageLoader {
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
             return handleResponse(data: data, response: response)
-            
-        } catch {
+        } catch  {
             throw error
         }
+        
     }
+    
 }
 
-
-class lessonTwoViewModel: ObservableObject {
+class DownloadImageAsyncViewModel: ObservableObject {
     @Published var image: UIImage? = nil
-    let loader = ImageLoader()
+    let loader = DownloadImageAsyncLoader()
     var cancellables = Set<AnyCancellable>()
     
-    func fetchImage() async {
-        /*
-//        loader.downloadWithEscaping {[weak self] image, error in
-//            DispatchQueue.main.async {
-//                self?.image = image
-//            }
-//        }
-        
-//        loader.downloadWithCombine()
-//            .receive(on: DispatchQueue.main)
-//            .sink { _ in
-//                
-//            } receiveValue: { [weak self] image in
-//                self?.image = image
-//            }
-//            .store(in: &cancellables)
-        */
-        
-        let image = try? await loader.downloadWithAsync()
-        
-        await MainActor.run {
-            self.image = image
+    func fetchImage() {
+        self.image = UIImage(systemName: "photo")
+    }
+    
+    func fetchImageWithEscaping() {
+        loader.downloadWithEscaping { [weak self] image, error in
+            if let image = image {
+                DispatchQueue.main.async {
+                    self?.image = image
+                }
+            }
         }
+    }
+    
+    func fetchImageWithCombine() {
+        loader.downloadWithCombine()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                
+            } receiveValue: { [weak self] image in
+                    self?.image = image
+            }
+            .store(in: &cancellables)
+    }
+    
+    func fetchImageWithAsync() async {
+        self.image = try? await loader.downloadWithAsync()
     }
 }
 
-struct lessonTwo: View {
+
+struct DownloadImageAsync: View {
     
-    @StateObject private var vm = lessonTwoViewModel()
+    @StateObject var viewModel = DownloadImageAsyncViewModel()
     
     var body: some View {
         ZStack {
-            if let image = vm.image {
+            
+            if let image = viewModel.image {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 250, height: 250)
+                    .frame(width: 200, height: 200)
             }
         }
         .onAppear {
             Task {
-                await vm.fetchImage()
+                await viewModel.fetchImageWithAsync()
             }
         }
     }
 }
 
 #Preview {
-    lessonTwo()
+    DownloadImageAsync()
 }
