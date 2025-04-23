@@ -81,7 +81,7 @@ class lessonTwoViewModel: ObservableObject {
     }
 }
 
-struct lessonTwo: View {
+struct LessonTwo: View {
     
     @StateObject private var vm = lessonTwoViewModel()
     
@@ -103,5 +103,5 @@ struct lessonTwo: View {
 }
 
 #Preview {
-    lessonTwo()
+    LessonTwo()
 }
