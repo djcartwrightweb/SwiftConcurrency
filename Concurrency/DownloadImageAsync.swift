@@ -81,7 +81,10 @@ class DownloadImageAsyncViewModel: ObservableObject {
     }
     
     func fetchImageWithAsync() async {
-        self.image = try? await loader.downloadWithAsync()
+        let image = try? await loader.downloadWithAsync()
+        await MainActor.run {
+            self.image = image
+        }
     }
 }
 
