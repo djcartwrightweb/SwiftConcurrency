@@ -27,30 +27,30 @@ struct LessonFive: View {
             }
             .navigationTitle(Text("Lesson Five 🥳"))
         }
-        .onAppear {
-            Task {
-                do {
-                    
-                    async let fetchImage1 = fetchImage()
-                    async let fetchTitle1 = fetchTitle()
-                    
-                    let (image, title) = await (try fetchImage1, fetchTitle1)
-                    
-//                    async let fetchImage2 = fetchImage()
-//                    async let fetchImage3 = fetchImage()
-//                    async let fetchImage4 = fetchImage()
+//        .onAppear {
+//            Task {
+//                do {
 //                    
-//                    let (image1, image2, image3, image4) = try await (fetchImage1, fetchImage2, fetchImage3, fetchImage4)
-//                    self.images.append(contentsOf: [image1, image2, image3, image4])
-                    
-                } catch {
-                    print("Error fetching images: \(error.localizedDescription)")
-                }
-            }
+////                    async let fetchImage1 = fetchImage()
+////                    async let fetchTitle1 = fetchTitle()
+//                    
+////                    let (image, title) = await (try fetchImage1, fetchTitle1)
+//                    
+////                    async let fetchImage2 = fetchImage()
+////                    async let fetchImage3 = fetchImage()
+////                    async let fetchImage4 = fetchImage()
+////                    
+////                    let (image1, image2, image3, image4) = try await (fetchImage1, fetchImage2, fetchImage3, fetchImage4)
+////                    self.images.append(contentsOf: [image1, image2, image3, image4])
+//                    
+//                } catch {
+//                    print("Error fetching images: \(error.localizedDescription)")
+//                }
+//            }
             
             
             
-        }
+//        }
     }
     
     func fetchTitle() async -> String {
